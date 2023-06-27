@@ -119,8 +119,18 @@ function memoize(func) {
  * }, 2);
  * retryer() => 2
  */
-function retry(/* func, attempts */) {
-  throw new Error('Not implemented');
+function retry(func, attempts) {
+  let attempt = 0;
+  return (...arg) => {
+    while (attempt < attempts) {
+      try {
+        attempt = func(...arg);
+      } catch (error) {
+        attempt += 1;
+      }
+    }
+    return attempt;
+  };
 }
 
 
@@ -147,8 +157,14 @@ function retry(/* func, attempts */) {
  * cos(3.141592653589793) ends
  *
  */
-function logger(/* func, logFunc */) {
-  throw new Error('Not implemented');
+function logger(func, logFunc) {
+  return (...args) => {
+    const str = JSON.stringify([...args]);
+    logFunc(`${func.name}(${str.slice(1, str.length - 1)}) starts`);
+    const result = func(...args);
+    logFunc(`${func.name}(${str.slice(1, str.length - 1)}) ends`);
+    return result;
+  };
 }
 
 
@@ -165,11 +181,12 @@ function logger(/* func, logFunc */) {
  *   partialUsingArguments(fn, 'a','b','c')('d') => 'abcd'
  *   partialUsingArguments(fn, 'a','b','c','d')() => 'abcd'
  */
-function partialUsingArguments(/* fn, ...args1 */) {
-  throw new Error('Not implemented');
+function partialUsingArguments(fn, ...args1) {
+  if (args1.length >= fn.length) {
+    return fn(...args1);
+  }
+  return (...rest) => fn(...args1, ...rest);
 }
-
-
 /**
  * Returns the id generator function that returns next integer starting
  * from specified number every time when invoking.
@@ -187,8 +204,12 @@ function partialUsingArguments(/* fn, ...args1 */) {
  *   getId4() => 7
  *   getId10() => 11
  */
-function getIdGeneratorFunction(/* startFrom */) {
-  throw new Error('Not implemented');
+function getIdGeneratorFunction(startFrom) {
+  let i = startFrom - 1;
+  return () => {
+    i += 1;
+    return i;
+  };
 }
 
 
